@@ -5,7 +5,7 @@ Data-driven approaches can be seen as attractive solutions to produce reduced-or
 
 Our framework relies on adversarial training to improve the longevity of the surrogate forecasts and it consists of two steps:
 
-1. Two-step dimension-reduction: Firstly, Principal Component Analysis (PCA) is used to reduce the dimensions of the system (). Secondly, an adversarial AE is trained on the Principal Components of the model solution in order to create a latent space with a normal distribution.
+1. Two-step dimension-reduction: Firstly, Principal Component Analysis (PCA) is used to reduce the dimensions of the system (extractFieldsAndPCA). Secondly, an adversarial AE is trained on the Principal Components of the model solution in order to create a latent space with a normal distribution.
 
 2. The latent space is then used to train an adversarial LSTM (). Robustness which may be achieved by detecting and rejecting adversarial examples by using adversarial training, allowing us to reduce the divergence of the forecast prediction over time and better compression from full-space to latent space.
 
