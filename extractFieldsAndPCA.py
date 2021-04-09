@@ -5,6 +5,7 @@ import numpy as np
 import pyvista as pv
 import eofs
 from eofs.standard import Eof
+from variables import directory_data, field_name, start, end, nsize
 
 class extractFieldsAndPCA():
     def __init__(self, directory_data, start, end, start_pca, end_pca, nsize):
