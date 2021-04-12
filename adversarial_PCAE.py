@@ -32,7 +32,7 @@ class ClipConstraint(Constraint):
 # clip model weights to a given hypercube
 class AAE():
 
-    def __init__(self, directory_data, observationPeriod, field_name, npcs, initNNodes, latent_dim):
+    def __init__(self, directory_data, field_name, npcs, initNNodes, latent_dim, GANorWGAN):
 
         # Wasserstein loss
         def wasserstein_loss(y_true, y_pred):
@@ -40,13 +40,13 @@ class AAE():
 
         self.field_name = field_name
         self.directory_data = directory_data
-        self.observationPeriod = observationPeriod
         self.latent_dim = latent_dim
         self.npcs = npcs
         self.constraint = 0.01
         self.dropoutNumber = 0.5
         self.alpha = 0.3
         self.initNNodes = initNNodes
+        self.GANorWGAN = GANorWGAN
 
         self.c1_hist = []
         self.c2_hist = []
@@ -54,8 +54,10 @@ class AAE():
 
         self.optimizer = tf.optimizers.Nadam()
 
-        self.loss = wasserstein_loss
-        #self.loss = 'binary_crossentropy'
+        if self.GANorWGAN == 'WGAN':
+            self.loss = wasserstein_loss
+        elif self.GANorWGAN == 'GAN'
+            self.loss = 'binary_crossentropy'
 
         self.loss_gen = 'mse'
 
@@ -148,11 +150,8 @@ class AAE():
     def train(self, epochs, batch_size=128, sample_interval=50, n_critic=5):
 
         # Load and pre process the data
-        print(self.directory_data)
-        print(self.observationPeriod)
-        print(self.field_name)
 
-        pcs_trun = np.load(self.directory_data + self.observationPeriod + '/' + 'pcs_' + self.field_name + '_' +
+        pcs_trun = np.load(self.directory_data + '/' + 'pcs_' + self.field_name + '_' +
                            self.observationPeriod + '.npy')
 
         np.random.seed(42)
@@ -170,20 +169,26 @@ class AAE():
         ls_scaled = scaler(pcs_trun, min_ls, max_ls, min, max)
 
         global X_train, y_train, X_all
-        X_train, X_test, y_train, y_test = train_test_split(ls_scaled, ls_scaled, test_size=0.1, shuffle=False,
-                                                            random_state=42)
+
         X_all = ls_scaled
 
-        # Adversarial ground truths
-        real = -np.ones(batch_size)
-        fake = np.ones(batch_size)
+        if self.GANorWGAN == 'WGAN':
+            real = -np.ones(batch_size)
+            fake = np.ones(batch_size)
+
+        if self.GANorWGAN == 'GAN':
+            real = np.ones(batch_size)
+            fake = np.zeros(batch_size)
+
         # Training the model
         for epoch in range(epochs):
             c1_tmp, c2_tmp = list(), list()
-            randomIndex = np.random.randint(0, X_all.shape[0], size=batch_size)
-            noise = np.random.normal(0, 1, size=(batch_size, self.latent_dim))
+
             # Training the discriminator more often than the generator
             for _ in range(n_critic):
+                # Randomly selected samples and noise
+                randomIndex = np.random.randint(0, X_all.shape[0], size=batch_size)
+                noise = np.random.normal(0, 1, size=(batch_size, self.latent_dim))
                 # Select a random batch of input
                 real_seqs = X_all[randomIndex]
 
@@ -222,6 +227,8 @@ class AAE():
                                         self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
                                         save_format='tf')
 
+    # Plots the (W)GAN related losses at every sample interval
+
     def plot_loss(self, epoch):
         fig = plt.figure()
         plt.subplot(1,2,1)
@@ -241,6 +248,9 @@ class AAE():
         plt.savefig(self.directory_data + '/' + 'Losses_AAE_MV-PCAE_WGAN_' + self.field_name + '_' + '_' + str(epoch) +
                     '_' + str(self.latent_dim) + '.png')
         plt.close()
+
+    # Plots predicted in the first 8 latent dimension at every sample interval
+
     def plot_values(self, epoch):
 
         prediction = self.generator_decoder.predict(self.generator_encoder(X_all))
@@ -259,13 +269,24 @@ if __name__ == '__main__':
     directory_data = '/data/'
     field_name = 'Velocity'
 
-    latentSpaceDimensions = 8
     epochs = 100000
     batch_size = 32
     n_critic = 5
     sample_interval = 10000
     latent_dim = 4
     npcs = 1000
+    #Initial number of nodes for the AE
     initNNodes = 64
-    gan = AAE(directory_data=directory_data, observationPeriod=observationPeriod, field_name=field_name, npcs=npcs, initNNodes=initNNodes, latent_dim=latent_dim)
-    gan.train(epochs=epochs, batch_size=batch_size, sample_interval=sample_interval, n_critic = n_critic)
+    #Training method
+    GANorWGAN = 'WGAN'
+    gan = AAE(directory_data=directory_data,
+              field_name=field_name,
+              npcs=npcs,
+              initNNodes=initNNodes,
+              latent_dim=latent_dim,
+              GANorWGAN=GANorWGAN)
+
+    gan.train(epochs=epochs,
+              batch_size=batch_size,
+              sample_interval=sample_interval,
+              n_critic = n_critic)
