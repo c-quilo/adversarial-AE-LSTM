@@ -165,6 +165,7 @@ class GAN():
         X_all = lookBack(lv_scaled[:-1, :], look_back)
         # Delta latent space with respect to time
         y_all = lv_scaled[look_back:]-lv_scaled[look_back-1:-1]
+        y_all = np.expand_dims(y_all, 1)
 
         if self.GANorWGAN == 'WGAN':
             real = -np.ones(batch_size)
@@ -184,7 +185,7 @@ class GAN():
             for _ in range(n_critic):
                 # Randomly selected samples and noise
                 randomIndex = np.random.randint(0, X_all.shape[0], size=batch_size)
-                noise = np.random.normal(0, 1, size=(batch_size, self.latent_dim))
+                noise = np.random.normal(0, 1, size=(batch_size, self.look_back, self.latent_dim))
 
                 # Select a random batch for input
                 real_input = X_all[randomIndex]
@@ -278,12 +279,14 @@ if __name__ == '__main__':
 
     #Training method
     GANorWGAN = 'WGAN'
+
     gan = GAN(directory_data=directory_data,
               field_name=field_name,
               npcs=npcs,
               latent_dim = latent_dim,
               look_back=look_back,
               GANorWGAN=GANorWGAN)
+
     gan.train(epochs=epochs,
               batch_size=batch_size,
               sample_interval=sample_interval,
