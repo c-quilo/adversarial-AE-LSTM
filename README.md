@@ -11,9 +11,17 @@ Our framework relies on adversarial training to improve the longevity of the sur
 
 Statistics of the model can be plotted using () and ().
 
+<p align="center">
+
+<img src=https://user-images.githubusercontent.com/55235161/114585471-98005080-9c7b-11eb-8a58-182803120ca4.gif alt='Prediction'/>
+
+</p>
+
 ## Requirements
 
 python 3
-tensorflow 2.4.0\
-scikit-learn 0.23.2\
+
+tensorflow 2.4.0
+
+scikit-learn 0.23.2
 
