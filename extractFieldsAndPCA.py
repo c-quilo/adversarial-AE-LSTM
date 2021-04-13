@@ -1,11 +1,8 @@
 import sys, os
-sys.path.append('/Users/cequilod/')
-import vtktools
 import numpy as np
 import pyvista as pv
 import eofs
 from eofs.standard import Eof
-from variables import directory_data, field_name, start, end, nsize
 
 class extractFieldsAndPCA():
     def __init__(self, directory_data, start, end, start_pca, end_pca, nsize):
@@ -42,6 +39,7 @@ class extractFieldsAndPCA():
         observationPeriod = 'data_' + str(start_interv) + '_to_' + str(end_interv)
         modelData = np.load(self.directory_data + observationPeriod + '/' + field_name + '_' + observationPeriod + '.npy')
 
+        #Velocity is a 3D vector and needs to be reshaped before the PCA
         if 'Velocity' in field_name:
             modelData = np.reshape(modelData, (modelData.shape[0], modelData.shape[1] * modelData.shape[2]), order='F')
 
