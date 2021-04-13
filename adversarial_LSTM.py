@@ -29,7 +29,7 @@ class ClipConstraint(Constraint):
     def get_config(self):
         return {'clip_value': self.clip_value}
 # clip model weights to a given hypercube
-class GAN():
+class ALSTM():
     # Implementation of wasserstein loss
     def __init__(self, directory_data, field_name, npcs, latent_dim, look_back, GANorWGAN):
         def wasserstein_loss(y_true, y_pred):
@@ -280,14 +280,14 @@ if __name__ == '__main__':
     #Training method
     GANorWGAN = 'WGAN'
 
-    gan = GAN(directory_data=directory_data,
+    advLSTM = ALSTM(directory_data=directory_data,
               field_name=field_name,
               npcs=npcs,
               latent_dim = latent_dim,
               look_back=look_back,
               GANorWGAN=GANorWGAN)
 
-    gan.train(epochs=epochs,
+    advLSTM.train(epochs=epochs,
               batch_size=batch_size,
               sample_interval=sample_interval,
               n_critic = n_critic)
