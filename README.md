@@ -13,7 +13,7 @@ Statistics of the model can be plotted using () and ().
 
 <p align="center">
 
-<img src=https://user-images.githubusercontent.com/55235161/114585471-98005080-9c7b-11eb-8a58-182803120ca4.gif alt='Prediction'/>
+<img src=https://user-images.githubusercontent.com/55235161/114712200-bcb20200-9d27-11eb-87b2-c79dea0a9c7e.gif alt='Prediction'/>
 
 </p>
 
