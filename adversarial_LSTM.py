@@ -31,7 +31,7 @@ class ClipConstraint(Constraint):
 # clip model weights to a given hypercube
 class ALSTM():
     # Implementation of wasserstein loss
-    def __init__(self, directory_data, field_name, npcs, latent_dim, look_back, GANorWGAN):
+    def __init__(self, directory_data, field_name, npcs, latent_dim, observationPeriod, look_back, GANorWGAN):
         def wasserstein_loss(y_true, y_pred):
             return backend.mean(y_true * y_pred)
 
@@ -44,6 +44,7 @@ class ALSTM():
         self.dropoutNumber = 0.5
         self.alpha = 0.3
         self.hiddenNodes = 64
+        self.observationPeriod = observationPeriod
         self.look_back = look_back
         self.GANorWGAN = GANorWGAN
 
@@ -55,7 +56,7 @@ class ALSTM():
 
         if GANorWGAN == 'WGAN':
             self.loss = wasserstein_loss
-        elif GANorWGAN == 'GAN'
+        elif GANorWGAN == 'GAN':
             self.loss = 'binary_crossentropy'
 
         # Adversarial autoencoder loss
@@ -120,8 +121,7 @@ class ALSTM():
 
         # Load principal components and use previously trained Adversarial encoder to obtain latent values
 
-        pcs_trun = np.load(self.directory_data + '/' + 'pcs_' + self.field_name + '_' +
-                           self.observationPeriod + '.npy')
+        pcs_trun = np.load(self.directory_data + '/' + 'pcs_' + self.field_name + '_' + 'data_150_to_1150' + '.npy')
         # Load encoder
         generator_enc = tf.models.load_model(self.directory_data + '/' + 'AAE_MV_generator_encoder_Full_'
                                              + self.field_name + '_' + str(latent_dim) + '_' + str(100000))
@@ -220,7 +220,7 @@ class ALSTM():
                 self.plot_loss(epoch)
                 self.plot_values(epoch)
                 # Saving the adversarial LSTM
-                self.alstm.save(self.directory_data + '/' + 'AAE_generator_LSTM_GAN_noise_'
+                self.alstm.save(self.directory_data + '/' + 'AAE_generator_LSTM_WGAN_noise_'
                                 + self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch), save_format='tf')
 
     # Plots the (W)GAN related losses at every sample interval
@@ -229,19 +229,19 @@ class ALSTM():
         plt.subplot(1,2,1)
         plt.plot(self.c1_hist, c='red')
         plt.plot(self.c2_hist, c='blue')
-        plt.plot(self.g_hist, c='orange')
+        plt.plot(self.g_hist[0][1], c='orange')
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
         plt.title("GAN Loss per Epoch")
         plt.legend(['C real', 'C fake', 'Generator'])
 
         plt.subplot(1,2,2)
-        plt.plot(self.g_hist, c='green')
+        plt.plot(self.g_hist[0][1], c='green')
         plt.xlabel('Epoch')
         plt.ylabel('Mean squared error (-)')
         plt.title('MSE loss')
         plt.legend(['MSE loss'])
-        plt.savefig(self.directory_data + '/' + 'Losses_AAE-PCAE_LSTM_GAN_noise_' +
+        plt.savefig(self.directory_data + '/' + 'Losses_AAE-PCAE_LSTM_WGAN_noise_' +
                     self.field_name + '_' + '_' + str(epoch)+ '_' + str(self.latent_dim) +
                     '.png')
         plt.close()
@@ -251,30 +251,33 @@ class ALSTM():
         prediction = self.alstm.predict(X_all)
         for i in np.arange(8):
             plt.subplot(2, 4, i+1)
-            plt.plot(y_all[:, i])
+            plt.plot(y_all[:, :, i])
             plt.plot(prediction[:, :, i], alpha=0.8)
             plt.title('LS dim: ' + str(i))
         plt.tight_layout()
 
         plt.tight_layout()
-        plt.savefig(self.directory_data + '/' + 'Plots_AAE-PCAE_LSTM_GAN_noise_' +
+        plt.savefig(self.directory_data + '/' + 'Plots_AAE-PCAE_LSTM_' + GANorWGAN + '_noise_' +
                     self.field_name + '_' + '_' + str(epoch) + '_' + str(self.latent_dim) +
                     '.png')
         plt.close()
 
 if __name__ == '__main__':
-    directory_data = '/data/'
-    field_name = 'Velocity'
+    directory_data = '/Users/cequilod/sLSBU_Simulation/data_150_to_1150/'
+    field_name = 'Tracer'
     npcs = 1000
     latent_dim = 8
     start_interv = 150
     end_interv = 1150
-
-    latentSpaceDimensions = [8]  # , 16, 32, 64, 128]
+    observationPeriod = 'data_' + str(start_interv) + '_' + str(end_interv)
+    latentSpaceDimensions = 8  # , 16, 32, 64, 128]
     epochs = 100001
     batch_size = 32
+    # Number of times Discriminator is trained before training stacked model
     n_critic = 5
+    # Checkpoint interval for saving models
     sample_interval = 10000
+    # Previous time-steps to be considered
     look_back = 5
 
     #Training method
@@ -284,6 +287,7 @@ if __name__ == '__main__':
               field_name=field_name,
               npcs=npcs,
               latent_dim = latent_dim,
+              observationPeriod=observationPeriod,
               look_back=look_back,
               GANorWGAN=GANorWGAN)
 
