@@ -32,7 +32,7 @@ class ClipConstraint(Constraint):
 # clip model weights to a given hypercube
 class AAE():
 
-    def __init__(self, directory_data, field_name, npcs, initNNodes, latent_dim, GANorWGAN):
+    def __init__(self, directory_data, field_name, npcs, observationPeriod, initNNodes, latent_dim, GANorWGAN):
 
         # Wasserstein loss
         def wasserstein_loss(y_true, y_pred):
@@ -45,6 +45,7 @@ class AAE():
         self.constraint = 0.01
         self.dropoutNumber = 0.5
         self.alpha = 0.3
+        self.observationPeriod = observationPeriod
         self.initNNodes = initNNodes
         self.GANorWGAN = GANorWGAN
 
@@ -56,7 +57,7 @@ class AAE():
 
         if self.GANorWGAN == 'WGAN':
             self.loss = wasserstein_loss
-        elif self.GANorWGAN == 'GAN'
+        elif self.GANorWGAN == 'GAN':
             self.loss = 'binary_crossentropy'
 
         self.loss_gen = 'mse'
@@ -216,15 +217,15 @@ class AAE():
 
                 self.plot_loss(epoch)
                 self.plot_values(epoch)
-                self.generator_encoder.save(self.directory_data + '/' + 'AAE_MV_generator_encoder_Full_WGAN_' +
-                                            self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
+                self.generator_encoder.save(self.directory_data + '/' + 'AAE_MV_generator_encoder_Full_' + GANorWGAN +
+                                            '_' + self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
                                             save_format='tf')
-                self.generator_decoder.save(self.directory_data + '/' + 'AAE_MV_generator_decoder_Full_WGAN_' +
-                                            self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
+                self.generator_decoder.save(self.directory_data + '/' + 'AAE_MV_generator_decoder_Full_' + GANorWGAN +
+                                            '_' + self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
                                             save_format='tf')
 
-                self.discriminator.save(self.directory_data + '/' + 'AAE_MV_discriminator_Full_WGAN_' +
-                                        self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
+                self.discriminator.save(self.directory_data + '/' + 'AAE_MV_discriminator_Full_WGAN_' + GANorWGAN +
+                                        '_' + self.field_name + '_' + str(self.latent_dim) + '_' + str(epoch),
                                         save_format='tf')
 
     # Plots the (W)GAN related losses at every sample interval
@@ -234,18 +235,18 @@ class AAE():
         plt.subplot(1,2,1)
         plt.plot(self.c1_hist, c='red')
         plt.plot(self.c2_hist, c='blue')
-        plt.plot(self.g_hist, c='orange')
+        plt.plot(self.g_hist[0][0], c='orange')
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
         plt.title("GAN Loss per Epoch")
         plt.legend(['C real', 'C fake', 'Generator'])
 
         plt.subplot(1,2,2)
-        plt.subplot(self.g_hist, c='green')
+        plt.plot(self.g_hist[0][1], c='green')
         plt.xlabel('Epoch')
         plt.ylabel('Mean squared error')
         plt.title('MSE loss')
-        plt.savefig(self.directory_data + '/' + 'Losses_AAE_MV-PCAE_WGAN_' + self.field_name + '_' + '_' + str(epoch) +
+        plt.savefig(self.directory_data + '/' + 'Losses_AAE_MV-PCAE_' + GANorWGAN + '_' + self.field_name + '_' + '_' + str(epoch) +
                     '_' + str(self.latent_dim) + '.png')
         plt.close()
 
@@ -261,20 +262,24 @@ class AAE():
 
             #plt.legend(['Prediction', 'GT'])
         plt.tight_layout()
-        plt.savefig(self.directory_data + '/' + 'Plots_AAE_MV-PCAE_WGAN_' + self.field_name + '_' + '_' + str(epoch) +
+        plt.savefig(self.directory_data + '/' + 'Plots_AAE_MV-PCAE_' + GANorWGAN + '_' + self.field_name + '_' + '_' + str(epoch) +
                     '_' + str(self.latent_dim) + '.png')
         plt.close()
 
 if __name__ == '__main__':
-    directory_data = '/data/'
+    directory_data = '/Users/cequilod/sLSBU_Simulation/data_150_to_1150'
     field_name = 'Velocity'
 
-    epochs = 100000
+    epochs = 100001
     batch_size = 32
     n_critic = 5
     sample_interval = 10000
     latent_dim = 4
     npcs = 1000
+    #Interval within the simulation
+    start = 150
+    end = 1150
+    observationPeriod = 'data_' + str(start) + '_to_' + str(end)
     #Initial number of nodes for the AE
     initNNodes = 64
     #Training method
@@ -282,6 +287,7 @@ if __name__ == '__main__':
     advAE = AAE(directory_data=directory_data,
               field_name=field_name,
               npcs=npcs,
+              observationPeriod=observationPeriod,
               initNNodes=initNNodes,
               latent_dim=latent_dim,
               GANorWGAN=GANorWGAN)
