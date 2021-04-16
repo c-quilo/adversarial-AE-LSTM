@@ -25,3 +25,10 @@ tensorflow 2.4.0
 
 scikit-learn 0.23.2
 
+## Citing this work
+
+
+
+If you use this code or these models in your work, please cite the accompanying paper:
+
+
