@@ -27,8 +27,16 @@ scikit-learn 0.23.2
 
 ## Citing this work
 
-
-
 If you use this code or these models in your work, please cite the accompanying paper:
+
+```
+@article{quilodran2021adversarial,
+  title={Adversarial autoencoders and adversarial LSTM for improved forecasts of urban air pollution simulations,
+  author={Quilodr{\'a}n-Casas, C{\'e}sar and Silva and Arcucci, Rossella and Laetitia Mottet and Guo, Yike and Pain, Christopher C},
+  journal={https://arxiv.org/abs/2104.06297},
+  year={2021}
+}
+```
+
 
 
