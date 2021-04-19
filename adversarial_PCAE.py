@@ -267,7 +267,7 @@ class AAE():
         plt.close()
 
 if __name__ == '__main__':
-    directory_data = '/Users/cequilod/sLSBU_Simulation/data_150_to_1150'
+    directory_data = '/data/'
     field_name = 'Velocity'
 
     epochs = 100001
