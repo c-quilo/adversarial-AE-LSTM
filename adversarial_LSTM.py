@@ -89,7 +89,7 @@ class ALSTM():
         in_disc = tf.Input(shape=(1, self.latent_dim))
         lstm_1 = tf.layers.Bidirectional(tf.layers.LSTM(self.hiddenNodes, return_sequences=False))(in_disc)
         dp_1 = tf.layers.Dropout(self.dropoutNumber)(lstm_1)
-        bn_1 = tf.layers.BatchNormalization()(dp_1)
+        bn_1 = tf.layers.LayerNormalization()(dp_1)
         rv_1 = tf.layers.RepeatVector(1)(bn_1)
 
         # Discriminator output
@@ -109,7 +109,7 @@ class ALSTM():
 
         lstm_1 = tf.layers.Bidirectional(tf.layers.LSTM(self.hiddenNodes, return_sequences=False))(in_gen)
         dp_1 = tf.layers.Dropout(self.dropoutNumber)(lstm_1)
-        bn_1 = tf.layers.BatchNormalization()(dp_1)
+        bn_1 = tf.layers.LayerNormalization()(dp_1)
         rv_1 = tf.layers.RepeatVector(1)(bn_1)
         # BiLSTM generator output
         gen_output = tf.layers.TimeDistributed(tf.layers.Dense(self.latent_dim, activation='linear'))(rv_1)
